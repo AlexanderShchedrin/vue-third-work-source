@@ -7,10 +7,14 @@
         <div class="desk__filters">
           <div class="desk__user-filter">
             <ul class="user-filter">
-              <li class="user-filter__item">
+              <li class="user-filter__item"
+                  v-for="user in users"
+                  :key="user.id"
+                  :title="user.name"
+              >
                 <a class="user-filter__button">
                   <img
-                      src=""
+                      :src="getImage(user.avatar)"
                       alt="Аватар юзера"
                       width="24"
                       height="24"
@@ -57,3 +61,8 @@
     </section>
   </main>
 </template>
+<script setup>
+  import users from '@/mock/users.json';
+
+  const getImage = (image) => new URL(`@/assets/img/${image}`, import.meta.url).href;
+</script>
