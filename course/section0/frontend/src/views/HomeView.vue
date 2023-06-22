@@ -25,8 +25,14 @@
           </div>
           <div class="desk__meta-filter">
             <ul class="meta-filter">
-              <li class="meta-filter__item">
-                <a class="meta-filter__status"></a>
+              <li class="meta-filter__item"
+                  v-for="({ value, label }) in STATUSES"
+                  :key="value"
+              >
+                <a class="meta-filter__status"
+                   :class="`meta-filter__status--color meta-filter__status--${value}`"
+                   :title="label"
+                ></a>
               </li>
             </ul>
           </div>
@@ -63,6 +69,7 @@
 </template>
 <script setup>
   import users from '@/mock/users.json';
+  import {STATUSES} from "@/common/constants";
 
   const getImage = (image) => new URL(`@/assets/img/${image}`, import.meta.url).href;
 </script>
