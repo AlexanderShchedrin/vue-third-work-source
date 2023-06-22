@@ -47,21 +47,43 @@
         >
           <h2 class="column__name">{{ column.title }}</h2>
           <div class="column__target-area">
-            <div class="column__task">
+            <div class="column__task"
+                 v-for="task in columnTasks[column.id]"
+                 :key="column.id"
+            >
               <div class="task">
-                <div class="task__user">
+                <div class="task__user"
+                     v-if="task.user"
+                >
                   <div class="task__avatar">
-                    <img src="" alt="задача" width="20" height="20"/>
+                    <img
+                        :src="getImage(task.user.avatar)"
+                        :alt="task.user.name"
+                        width="20" height="20"/>
                   </div>
-                  Пользователь задачи
+                  {{ task.user.name }}
                 </div>
                 <div class="task__statuses">
-                  <span class="task__status"/>
-                  <span class="task__status"/>
+                  <span class="task__status"
+                        v-if="task.status"
+                        :class="`task__status--${task.status}`"
+                  />
+                  <span class="task__status"
+                        v-if="task.timeStatus"
+                        :class="`task__status--${task.timeStatus}`"
+                  />
                 </div>
-                <h5 class="task__title">Наименование задачи</h5>
-                <ul class="task__tags">
-                  <li><span class="tag tag--blue">Тег задачи</span></li>
+                <h5 class="task__title"
+                    :class="{'task__title--first': !task.user}"
+                >{{ task.title }}</h5>
+                <ul class="task__tags"
+                    v-if="task.tags && task.tags.length"
+                >
+                  <li v-for="(tag, index) in task.tags"
+                      :key="index"
+                  >
+                    <span class="tag tag--blue">{{ tag }}</span>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -75,9 +97,33 @@
   </main>
 </template>
 <script setup>
-  import columns from '../mock/columns.json';
+  // Подключения
+  import columns from '@/mock/columns.json';
   import users from '@/mock/users.json';
+  import rowTasks from '@/mock/tasks.json';
+  import {normalizeTask, getTagsArrayFromString} from "@/common/helpers";
   import {STATUSES} from "@/common/constants";
 
+  // Параметры
+  const normalizedTasks = rowTasks.map((task) => normalizedTasks(task));
+
+  // Функции
   const getImage = (image) => new URL(`@/assets/img/${image}`, import.meta.url).href;
+
+  /***
+   * Сортировка колонок
+   * @param normalizedTasks {Object[]}
+   * @returns {Object}
+   */
+  const columnTasks = (normalizedTasks) => {
+    return normalizedTasks
+        .filter(({ columnId }) => columnId)
+        .reduce((accumulator, task) => {
+          task.tags = getTagsArrayFromString(task.tags);
+          accumulator[task.columnId] ?
+              accumulator[task.columnId] = [...accumulator[task.columnId], task] :
+              accumulator[task.columnId] = [task];
+          return accumulator;
+        });
+  }
 </script>

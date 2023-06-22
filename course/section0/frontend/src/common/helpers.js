@@ -7,7 +7,7 @@ import taskStatuses from './enums/taskStatuses';
 
 /***
  * Разделение строки с метками по разделителю
- * @param tags{String} - строка с метками
+ * @param tags{String[]} - строка с метками
  * @returns {String[]} - массив со статусами
  */
 export const getTagsArrayFromString = tags => {
