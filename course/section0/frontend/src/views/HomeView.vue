@@ -105,7 +105,7 @@
   import {STATUSES} from "@/common/constants";
 
   // Параметры
-  const normalizedTasks = rowTasks.map((task) => normalizedTasks(task));
+  const normalizedTasks = rowTasks.map((task) => normalizeTask(task));
 
   // Функции
   const getImage = (image) => new URL(`@/assets/img/${image}`, import.meta.url).href;
