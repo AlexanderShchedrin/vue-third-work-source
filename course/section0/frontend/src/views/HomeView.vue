@@ -38,9 +38,14 @@
           </div>
         </div>
       </div>
-      <div class="desk__columns">
-        <div class="column">
-          <h2 class="column__name">Название колонки</h2>
+      <div class="desk__columns"
+           v-if="columns.length"
+      >
+        <div class="column"
+             v-for="column in columns"
+             :key="columns.id"
+        >
+          <h2 class="column__name">{{ column.title }}</h2>
           <div class="column__target-area">
             <div class="column__task">
               <div class="task">
@@ -63,11 +68,14 @@
           </div>
         </div>
       </div>
-      <p class="desk__emptiness">Пока нет ни одной колонки</p>
+      <p class="desk__emptiness"
+         v-else
+      >Пока нет ни одной колонки</p>
     </section>
   </main>
 </template>
 <script setup>
+  import columns from '../mock/columns.json';
   import users from '@/mock/users.json';
   import {STATUSES} from "@/common/constants";
 
