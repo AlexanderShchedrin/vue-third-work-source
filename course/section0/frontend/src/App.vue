@@ -87,7 +87,15 @@ function applyFilters ({ item, entity }) {
   }
 }
 </script>
+<style lang="scss" scoped>
+.app_layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
 
-<style lang="scss">
-@import "@/assets/scss/app.scss";
+.content {
+  display: flex;
+  flex-grow: 1;
+}
 </style>
