@@ -1,21 +1,16 @@
 <template>
-  <app-layout>
-    <router-view />
-  </app-layout>
+  <div class="app_layout">
+    <app-layout-header/>
+    <slot/>
+  </div>
 </template>
-
 <script setup>
-import { AppLayout } from "@/layouts";
+import AppLayoutHeader from "@/layouts/AppLayoutHeader.vue";
 </script>
 <style lang="scss" scoped>
 .app_layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
-}
-
-.content {
-  display: flex;
-  flex-grow: 1;
 }
 </style>
