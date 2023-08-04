@@ -10,6 +10,7 @@
     </li>
   </ul>
 </template>
+
 <script setup>
 import { computed } from 'vue'
 import { getTagsArrayFromString } from '@/common/helpers'
