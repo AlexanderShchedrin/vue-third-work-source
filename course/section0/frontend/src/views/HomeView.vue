@@ -2,6 +2,7 @@
   <main class="content">
     <section class="desk">
       <!--      Шапка доски -->
+      <RouterView :task="props.tasks"
       <div class="desk__header">
         <h1 class="desk__title">Design Coffee Lab</h1>
         <div class="desk__filters">
@@ -105,6 +106,12 @@
   import {STATUSES} from "@/common/constants";
 
   // Параметры
+  const props = defineProps({
+    tasks: {
+      type: Object,
+      default: () => [],
+    }
+  })
   const normalizedTasks = rowTasks.map((task) => normalizeTask(task));
 
   // Функции
