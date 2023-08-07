@@ -9,7 +9,13 @@ export default [
 				name: 'TaskView',
 				component: () => import('@/views/TaskView.vue'),
 				meta: { layout: 'AppLayoutMain' },
-			}
+			},
+			{
+				path: '/tasks/create',
+				name: 'TaskCreate',
+				component: () => import('../views/TaskCreate.vue'),
+				meta: { layout: 'AppLayoutMain' }
+			},
 		],
 	},
 ]
