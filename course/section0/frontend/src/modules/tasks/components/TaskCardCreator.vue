@@ -13,6 +13,7 @@
         type="button"
         @click="closeDialog"
       />
+
       <!--      Блок ввода имени и удаления задачи-->
       <div class="task-card__block">
         <div class="task-card__row">
@@ -38,14 +39,16 @@
           v-if="validations.title.error"
           class="task-card__error-text"
         >
-          {{ validations.title.error }}
+            {{ validations.title.error }}
         </span>
       </div>
+
       <!--      Блок статуса задачи-->
       <div class="task-card__status">
         <h4 class="task-card__title">
           Выберите статус:
         </h4>
+
         <!--        Список статусов задачи-->
         <ul class="meta-filter task-card__meta">
           <li
@@ -63,6 +66,7 @@
           </li>
         </ul>
       </div>
+
       <!--      Блок даты выполнения задачи-->
       <div
         v-if="task.id"
@@ -71,34 +75,39 @@
         <p class="task-card__date">
           {{ useTaskCardDate(task) }}
         </p>
+      </div>
+
       <!--      Блок ввода пользователя и даты срока выполнения-->
       <div class="task-card__block">
         <ul class="task-card__params">
           <!--          Блок выбора пользователя-->
-          <task-card-creator-user-selector v-model="task.userId"/>
+          <tasks-card-creator-user-selector v-model="task.userId"/>
           <!--          Блок выбора даты выполнения-->
-          <task-card-creator-due-date-selector v-model="task.dueDate"/>
+          <tasks-card-creator-due-date-selector v-model="task.dueDate"/>
         </ul>
       </div>
+
       <!--      Блок описания задачи-->
-        <div class="task-card__block">
-          <div class="task-card__description">
-            <h4 class="task-card__title">
-              Описание
-            </h4>
-            <textarea
-              v-model="task.description"
-              name="task_description"
-              placeholder="Добавьте описание к задаче"
-            />
-          </div>
+      <div class="task-card__block">
+        <div class="task-card__description">
+          <h4 class="task-card__title">
+            Описание
+          </h4>
+          <textarea
+            v-model="task.description"
+            name="task_description"
+            placeholder="Добавьте описание к задаче"
+          />
         </div>
+      </div>
+
       <!--      Блок внешней ссылки-->
       <div class="task-card__block">
         <div class="task-card__links">
           <h4 class="task-card__title">
             Ссылки
           </h4>
+
           <div class="task-card__links-item">
             <!--            Поле ввода ссылки-->
             <input
@@ -135,6 +144,7 @@
           @removeTick="removeTick"
         />
       </div>
+
       <!--      Блок тегов-->
       <div class="task-card__block">
         <!--        Компонент создания тегов-->
@@ -166,43 +176,21 @@
     </section>
   </div>
 </template>
+
 <script setup>
-import {ref, onMounted, watch} from 'vue'
-import {useRouter} from 'vue-router'
-import {cloneDeep} from 'lodash';
-import {createNewDate, createUUIDv4} from '@/common/helpers';
-import {STATUSES} from '@/common/constants';
-import taskStatuses from '@/common/enums/taskStatuses';
-import {useTaskCardDate} from '@/common/composables';
-import TaskCardCreatorUserSelector from './TaskCardCreatorUserSelector.vue'
-import TaskCardCreatorDueDateSelector from './TaskCardCreatorDueDateSelector.vue'
-import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksList.vue';
-import AppButton from '@/common/components/AppButton.vue';
-import TaskCardCreatorTags from '@/modules/tasks/components/TaskCardCreatorTags.vue';
-
-
-const props = defineProps({
-  taskToEdit: {
-    type: Object,
-    default: null
-  }
-})
-
-const router = useRouter()
-const dialog = ref(null)
-const isFormValid = ref(true)
-const emits = defineEmits(['addTask', 'editTask', 'deleteTask'])
-
-onMounted(() => {
-  // Фокусируем на диалоговом окне, чтобы сработала клавиша Esc без дополнительного клика на окне
-  dialog.value.focus()
-})
-
-// Отслеживаем изменения в задаче, чтобы сбросить ошибки валидации
-watch(task, () => {
-  isFormValid.value = true
-  validations.value = setEmptyValidations()
-}, { deep: true })
+import { ref, onMounted, watch } from 'vue'
+import TasksCardCreatorUserSelector from './TaskCardCreatorUserSelector.vue'
+import TasksCardCreatorDueDateSelector from './TaskCardCreatorDueDateSelector.vue'
+import TaskCardViewTicksList from './TaskCardViewTicksList.vue'
+import TaskCardCreatorTags from './TaskCardCreatorTags.vue'
+import AppButton from '@/common/components/AppButton.vue'
+import { useRouter } from 'vue-router'
+import { createUUIDv4, createNewDate } from '@/common/helpers'
+import { STATUSES } from '@/common/constants'
+import taskStatuses from '@/common/enums/taskStatuses'
+import { validateFields } from '@/common/validator'
+import { useTaskCardDate } from '@/common/composables'
+import { cloneDeep } from 'lodash'
 
 // Функция для создания новых задач
 const createNewTask = () => ({
@@ -219,9 +207,13 @@ const createNewTask = () => ({
   tags: ''
 })
 
-// Определяем, если мы работаем над редактированием задачи или создаём новую
-const taskToWork = props.taskToEdit ? cloneDeep(props.taskToEdit) : createNewTask();
-const task = ref(taskToWork)
+const createNewTick = () => ({
+  // Добавляем временный идентификатор до момента отправки на сервер
+  uuid: createUUIDv4(),
+  taskId: null,
+  text: '',
+  done: false
+})
 
 const setEmptyValidations = () => ({
   title: {
@@ -233,9 +225,48 @@ const setEmptyValidations = () => ({
     rules: ['url']
   }
 })
-const validations = ref(setEmptyValidations())
 
+const router = useRouter()
+
+const props = defineProps({
+  taskToEdit: {
+    type: Object,
+    default: null
+  }
+})
+const emits = defineEmits(['addTask', 'editTask', 'deleteTask'])
+
+// Определяем если мы работаем над редактированием задачи или создаем новую
+const taskToWork = props.taskToEdit ?
+  cloneDeep(props.taskToEdit) :
+  createNewTask()
+
+const task = ref(taskToWork)
+const validations = ref(setEmptyValidations())
+const isFormValid = ref(true)
 const statusList = ref(STATUSES.slice(0, 3))
+const dialog = ref(null)
+
+// Отслеживаем изменения в задаче чтобы сбросить ошибки валидации
+watch(task, () => {
+  isFormValid.value = true
+  validations.value = setEmptyValidations()
+}, { deep: true })
+
+onMounted(() => {
+  // Фокусируем на диалоговом окне чтобы сработала клавиша esc без дополнительного клика на окне
+  dialog.value.focus()
+})
+
+function closeDialog () {
+  // Закрытие диалога всего лишь переход на корневой маршрут
+  router.push('/')
+}
+
+function deleteTask () {
+  emits('deleteTask', task.value.id)
+  router.push('/')
+}
 
 function setStatus (status) {
   const [key] = Object.entries(taskStatuses)
@@ -247,14 +278,6 @@ function setStatus (status) {
     task.value.statusId = null
   }
 }
-
-const createNewTick = () => ({
-  // Добавляем временный идентификатор до момента отправки на сервер
-  uuid: createUUIDv4(),
-  taskId: null,
-  text: '',
-  done: false
-})
 
 function createTick () {
   task.value.ticks.push(createNewTick())
@@ -286,6 +309,10 @@ function removeTick ({ uuid, id }) {
   }
 }
 
+function setTags (tags) {
+  task.value.tags = tags
+}
+
 function submit () {
   // Валидируем задачу
   if (!validateFields(task.value, validations.value)) {
@@ -302,21 +329,8 @@ function submit () {
   // Переход на главную страницу
   router.push('/')
 }
-
-function setTags (tags) {
-  task.value.tags = tags
-}
-
-const deleteTask = () => {
-  emits('deleteTask', task.value.id)
-  router.push('/')
-}
-
-const closeDialog = () => {
-  // Закрытие диалога, всего лишь переход на корневой маршрут
-  router.push('/')
-}
 </script>
+
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
 

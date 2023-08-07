@@ -37,7 +37,7 @@
                 <a class="user-filter__button">
                   <img
                     :src="getImage(user.avatar)"
-                    alt="Аватар юзера"
+                    :alt="user.name"
                     width="24"
                     height="24"
                   />
