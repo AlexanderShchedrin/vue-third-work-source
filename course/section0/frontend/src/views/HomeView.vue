@@ -92,6 +92,7 @@
   import DeskColumn from '@/modules/columns/components/DeskColumn.vue';
   import {reactive} from 'vue';
   import {uniqueId} from 'lodash';
+  import {getImage} from '@/common/helpers';
 
   const props = defineProps({
     tasks: {

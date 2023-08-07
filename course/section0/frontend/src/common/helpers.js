@@ -4,6 +4,7 @@ import {
 } from './constants';
 import timeStatuses from './enums/timeStatuses';
 import taskStatuses from './enums/taskStatuses';
+import {toRaw} from 'vue';
 
 /***
  * Разделение строки с метками по разделителю
