@@ -52,7 +52,7 @@
 import {computed, ref, watch} from 'vue'
 import AppTextarea from '@/common/components/AppTextarea.vue'
 import AppButton from '@/common/components/AppButton.vue'
-import users from '@/mock/users.json'
+import users from '@/mocks/users.json'
 import {clearValidationErrors, validateFields} from '@/common/validator'
 
 const props = defineProps({

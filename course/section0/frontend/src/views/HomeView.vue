@@ -94,8 +94,8 @@
 
 <script setup>
 import { reactive } from 'vue'
-import columns from '@/mock/columns.json'
-import users from '@/mock/users.json'
+import columns from '@/mocks/columns.json'
+import users from '@/mocks/users.json'
 import { STATUSES } from '@/common/constants'
 import DeskColumn from '@/modules/columns/components/DeskColumn.vue'
 import { getImage } from '@/common/helpers'

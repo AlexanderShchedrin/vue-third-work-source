@@ -16,7 +16,7 @@
 import {computed, reactive} from 'vue';
 import {AppLayout} from '@/layouts';
 import {normalizeTask} from '@/common/helpers';
-import tasks from '@/mock/tasks.json';
+import tasks from '@/mocks/tasks.json';
 
 const state = reactive({
   tasks: tasks.map(task => normalizeTask(task)),
