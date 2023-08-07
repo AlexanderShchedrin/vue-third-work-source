@@ -135,10 +135,13 @@
           @removeTick="removeTick"
         />
       </div>
-
       <!--      Блок тегов-->
       <div class="task-card__block">
         <!--        Компонент создания тегов-->
+        <task-card-creator-tags
+          :tags="task.tags"
+          @setTags="setTags"
+        />
       </div>
 
       <!--      Блок сохранения и отмены изменений-->
@@ -175,6 +178,7 @@ import TaskCardCreatorUserSelector from './TaskCardCreatorUserSelector.vue'
 import TaskCardCreatorDueDateSelector from './TaskCardCreatorDueDateSelector.vue'
 import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksList.vue';
 import AppButton from '@/common/components/AppButton.vue';
+import TaskCardCreatorTags from '@/modules/tasks/components/TaskCardCreatorTags.vue';
 
 
 const props = defineProps({
@@ -297,6 +301,10 @@ function submit () {
   }
   // Переход на главную страницу
   router.push('/')
+}
+
+function setTags (tags) {
+  task.value.tags = tags
 }
 
 const deleteTask = () => {
