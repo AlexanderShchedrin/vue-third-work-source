@@ -18,7 +18,7 @@ watch(() => route.meta, async meta => {
   try {
     // Пробуем найти компонент из свойства meta и динамически импортировать его
     if (meta.layout) {
-      const component = await import(`@/layouts/${meta.layout}.vue`);
+      const component = await import(`./${meta.layout}.vue`);
       layout.value = component?.default || AppLayoutDefault;
     } else {
       layout.value = AppLayoutDefault;
@@ -34,10 +34,5 @@ watch(() => route.meta, async meta => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-}
-
-.content {
-  display: flex;
-  flex-grow: 1;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <!--  Отслеживает, в какую колонку передана задача-->
+  <!--  Отслеживает в какую колонку передана задача-->
   <app-drop
-      class="column"
-      @drop="moveTask"
+    class="column"
+    @drop="moveTask"
   >
     <h2 class="column__name">
       <!--      Показывает наименование колонки-->
@@ -10,44 +10,45 @@
         {{ state.columnTitle }}
       </span>
 
-      <!--      Показывает инпут, если колонка редактируется-->
+      <!--      Показывает инпут если колонка редактируется-->
       <input
-          v-else
-          ref="columnTitle"
-          v-model="state.columnTitle"
-          type="text"
-          class="column__input"
-          name="column_title"
-          @blur="updateInput"
+        v-else
+        ref="columnTitle"
+        v-model="state.columnTitle"
+        type="text"
+        class="column__input"
+        name="column_title"
+        @blur="updateInput"
       />
 
       <!--      Показывает иконку редактирования задачи-->
       <app-icon
-          v-if="!state.isInputShowed"
-          class="icon--edit"
-          @click="showInput"
+        v-if="!state.isInputShowed"
+        class="icon--edit"
+        @click="showInput"
       />
       <!--      Показывает иконку удаления колонки-->
-      <!--      Иконка не будет отображаться, если в колонке есть задачи-->
+      <!--      Иконка не будет отображаться если в колонке есть задачи-->
       <app-icon
-          v-if="!state.isInputShowed && !columnTasks.length"
-          class="icon--trash"
-          @click="$emit('delete', column.id)"
+        v-if="!state.isInputShowed && !columnTasks.length"
+        class="icon--trash"
+        @click="$emit('delete', column.id)"
       />
     </h2>
 
     <div class="column__target-area">
       <!--      Вынесли задачи в отдельный компонент-->
       <task-card
-          v-for="task in columnTasks"
-          :key="task.id"
-          :task="task"
-          class="column__task"
-          @drop="moveTask($event, task)"
+        v-for="task in columnTasks"
+        :key="task.id"
+        :task="task"
+        class="column__task"
+        @drop="moveTask($event, task)"
       />
     </div>
   </app-drop>
 </template>
+
 <script setup>
 import { reactive, computed, nextTick, ref } from 'vue'
 import AppDrop from '@/common/components/AppDrop.vue'
@@ -72,15 +73,15 @@ const emits = defineEmits(['update', 'delete', 'updateTasks'])
 // Фильтруем задачи, которые относятся к конкретной колонке
 const columnTasks = computed(() => {
   return props.tasks
-      .filter(task => task.columnId === props.column.id)
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+    .filter(task => task.columnId === props.column.id)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
 })
 
-// Показывает инпут для редактирования колонки и наводит фокус
+// Показывает инпут для редактирования колонки и наводим фокус
 async function showInput () {
   state.isInputShowed = true
-  // Функция nextTick ожидает, когда произойдёт ререндеринг компонента
-  // Так как мы изменили span на input, нужно подождать, когда отрисуется инпут
+  // Функция nextTick ожидает когда произойдет ререндер компонента
+  // Так как мы изменили span ни input, нам нужно подождать когда отрисуется инпут
   await nextTick()
   columnTitle.value.focus()
 }
@@ -98,7 +99,7 @@ function updateInput () {
 
 // Метод для переноса задач
 function moveTask (active, toTask) {
-  // Не обновлять, если нет изменений
+  // Не обновлять если нет изменений
   if (toTask && active.id === toTask.id) {
     return
   }
@@ -121,6 +122,7 @@ function moveTask (active, toTask) {
   emits('updateTasks', tasksToUpdate)
 }
 </script>
+
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
 .column {
