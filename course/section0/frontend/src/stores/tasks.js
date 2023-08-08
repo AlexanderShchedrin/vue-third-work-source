@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { useFiltersStore } from '@/stores/filters';
 import { useUsersStore } from '@/stores/users';
 import { normalizeTask } from '@/common/helpers';
-import tasks from '@/mocks/users.json';
+import tasks from '@/mocks/tasks.json';
 
 export const useTasksStore = defineStore('tasks', {
   state: () => ({

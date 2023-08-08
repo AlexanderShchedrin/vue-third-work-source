@@ -191,6 +191,7 @@ import taskStatuses from '@/common/enums/taskStatuses'
 import { validateFields } from '@/common/validator'
 import { useTaskCardDate } from '@/common/composables'
 import { cloneDeep } from 'lodash'
+import { useTasksStore } from '@/stores';
 
 // Функция для создания новых задач
 const createNewTask = () => ({
@@ -227,6 +228,7 @@ const setEmptyValidations = () => ({
 })
 
 const router = useRouter()
+const tasksStore = useTasksStore();
 
 const props = defineProps({
   taskToEdit: {
@@ -234,7 +236,6 @@ const props = defineProps({
     default: null
   }
 })
-const emits = defineEmits(['addTask', 'editTask', 'deleteTask'])
 
 // Определяем если мы работаем над редактированием задачи или создаем новую
 const taskToWork = props.taskToEdit ?
@@ -264,7 +265,7 @@ function closeDialog () {
 }
 
 function deleteTask () {
-  emits('deleteTask', task.value.id)
+  tasksStore.deleteTask(task.value.id)
   router.push('/')
 }
 
@@ -321,14 +322,15 @@ function submit () {
   }
   if (props.taskToEdit) {
     // Редактируемая задача
-    emits('editTask', task.value)
+    tasksStore.editTask(task.value)
   } else {
     // Новая задача
-    emits('addTask', task.value)
+    tasksStore.addTask(task.value)
   }
   // Переход на главную страницу
   router.push('/')
 }
+
 </script>
 
 <style lang="scss" scoped>

@@ -139,18 +139,13 @@ import { useTaskCardDate } from '@/common/composables'
 import TaskCardViewTicksList from '../modules/tasks/components/TaskCardViewTicksList.vue'
 import TaskCardTags from '../modules/tasks/components/TaskCardTags.vue'
 import TaskCardViewComments from '../modules/tasks/components/TaskCardViewComments.vue'
+import { useTasksStore } from '@/stores';
 
 const router = useRouter()
 const route = useRoute()
 
-const props = defineProps({
-  tasks: {
-    type: Array,
-    required: true
-  }
-})
-
 const dialog = ref(null)
+const tasksStore = useTasksStore()
 
 onMounted(() => {
   // Фокусируем на диалоговом окне чтобы сработала клавиша esc без дополнительного клика на окне
@@ -159,7 +154,7 @@ onMounted(() => {
 
 // Найдем задачу по id из массива задач
 const task = computed(() => {
-  return props.tasks.find(task => task.id == route.params.id)
+  return tasksStore.tasks.find(task => Number(task.id) === Number(route.params.id));
 })
 
 const dueDate = computed(() => {

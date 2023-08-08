@@ -29,14 +29,14 @@
             </div>
 
             <div class="backlog__counter">
-              {{ sidebarTasks.length }}
+              {{ tasksStore.sidebarTasks.length }}
             </div>
           </div>
 
           <div class="backlog__target-area">
             <!--  Задачи в бэклоге-->
             <task-card
-                v-for="task in sidebarTasks"
+                v-for="task in tasksStore.sidebarTasks"
                 :key="task.id"
                 :task="task"
                 class="backlog__task"
@@ -49,30 +49,16 @@
   </app-drop>
 </template>
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive } from 'vue'
 import AppDrop from '@/common/components/AppDrop.vue'
 import TaskCard from '@/modules/tasks/components/TaskCard.vue'
 import { getTargetColumnTasks, addActive } from '@/common/helpers'
+import { useTasksStore } from '@/stores';
 
-const props = defineProps({
-  tasks: {
-    type: Array,
-    required: true
-  }
-})
-
+const tasksStore = useTasksStore()
 const state = reactive({ backlogIsHidden: false })
 
-// Фильтруем задачи, которые относятся к бэклогу (columnId === null)
-const sidebarTasks = computed(() => {
-  return props.tasks
-      .filter(task => !task.columnId)
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-})
-
-const emits = defineEmits(['updateTasks'])
-
-const moveTask = (active, toTask) => {
+function moveTask (active, toTask) {
   // Не обновляем массив, если задача не перемещалась
   if (toTask && active.id === toTask.id) {
     return
@@ -80,7 +66,7 @@ const moveTask = (active, toTask) => {
 
   const toColumnId = null
   // Получить задачи для текущей колонки
-  const targetColumnTasks = getTargetColumnTasks(toColumnId, props.tasks)
+  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks)
   const activeClone = { ...active, columnId: toColumnId }
   // Добавить активную задачу в колонку
   const resultTasks = addActive(activeClone, toTask, targetColumnTasks)
@@ -93,8 +79,9 @@ const moveTask = (active, toTask) => {
       tasksToUpdate.push(newTask)
     }
   })
-  emits('updateTasks', tasksToUpdate)
+  tasksStore.updateTasks(tasksToUpdate)
 }
+
 </script>
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
