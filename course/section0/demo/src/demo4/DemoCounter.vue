@@ -1,23 +1,22 @@
 <template>
   <DemoContainer>
     <div class="counter">
-      <CounterButton @action="decrement"> - </CounterButton>
-      <CounterValue :value="count" />
-      <CounterButton @action="increment"> + </CounterButton>
+      <CounterButton
+        @action="counterStore.decrement"
+        :disabled="counterStore.isDecrementDisabled"
+      > - </CounterButton>
+      <CounterValue :value="counterStore.value" />
+      <CounterButton @action="counterStore.increment"> + </CounterButton>
     </div>
   </DemoContainer>
 </template>
 <script setup>
-import {ref} from "vue";
 import CounterButton from '@/demo1/CounterButton.vue';
 import CounterValue from '@/demo1/CounterValue.vue';
+import {useCounterStore} from '@/demo4/store';
 import DemoContainer from '@/components/DemoContainer.vue';
 
-const count = ref(0);
-
-const decrement = () => count.value -= 1;
-
-const increment = () => count.value += 1;
+const counterStore = useCounterStore();
 
 </script>
 <style scoped lang="scss">
