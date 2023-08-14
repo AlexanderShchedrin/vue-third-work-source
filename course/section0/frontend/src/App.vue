@@ -5,12 +5,13 @@
 </template>
 <script setup>
 import { AppLayout } from './layouts'
-import { useTasksStore, useColumnsStore, useUsersStore } from './stores'
+import { useTasksStore, useColumnsStore, useUsersStore, useCommentsStore } from './stores'
 
 // Определяем хранилища
 const tasksStore = useTasksStore()
 const usersStore = useUsersStore()
 const columnsStore = useColumnsStore()
+const commentsStore = useCommentsStore()
 
 // Загрузка первоначальных данных
 // Загружаем задачи
@@ -19,6 +20,9 @@ tasksStore.fetchTasks()
 usersStore.fetchUsers()
 // Загружаем колонки
 columnsStore.fetchColumns()
+// Загружаем комментарии
+void commentsStore.fetchComments()
+
 </script>
 
 <style lang="scss" scoped>
