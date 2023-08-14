@@ -1,132 +1,96 @@
 <template>
   <main class="content">
     <section class="desk">
-      <!--      Шапка доски -->
+      <!--      Отображение дочерних маршрутов-->
+      <router-view/>
+      <!--      Шапка доски-->
       <div class="desk__header">
         <h1 class="desk__title">Design Coffee Lab</h1>
+        <!--        Добавили кнопку для добавления новой колонки-->
+        <button
+          class="desk__add"
+          type="button"
+          @click="columnsStore.addColumn"
+        >
+          Добавить столбец
+        </button>
         <div class="desk__filters">
           <div class="desk__user-filter">
+            <!--            Список пользователей-->
             <ul class="user-filter">
-              <li class="user-filter__item"
-                  v-for="user in users"
-                  :key="user.id"
-                  :title="user.name"
+              <li
+                v-for="user in usersStore.users"
+                :key="user.id"
+                :title="user.name"
+                class="user-filter__item"
+                :class="{ active: filtersStore.filters.users.some(id => id === user.id) }"
+                @click="filtersStore.applyFilters({ item: user.id, entity: 'users' })"
               >
                 <a class="user-filter__button">
                   <img
-                      :src="getImage(user.avatar)"
-                      alt="Аватар юзера"
-                      width="24"
-                      height="24"
+                    :src="getImage(user.avatar)"
+                    :alt="user.name"
+                    width="24"
+                    height="24"
                   />
                 </a>
               </li>
             </ul>
           </div>
           <div class="desk__meta-filter">
+            <!--            Список статусов-->
             <ul class="meta-filter">
-              <li class="meta-filter__item"
-                  v-for="({ value, label }) in STATUSES"
-                  :key="value"
+              <li
+                v-for="({ value, label }) in STATUSES"
+                :key="value"
+                class="meta-filter__item"
+                :class="{ active: filtersStore.filters.statuses.some(s => s === value) }"
+                @click="filtersStore.applyFilters({ item: value, entity: 'statuses' })"
               >
-                <a class="meta-filter__status"
-                   :class="`meta-filter__status--color meta-filter__status--${value}`"
-                   :title="label"
-                ></a>
+                <a
+                  class="meta-filter__status"
+                  :class="`meta-filter__status meta-filter__status--color meta-filter__status--${value}`"
+                  :title="label"
+                />
               </li>
             </ul>
           </div>
         </div>
       </div>
-      <div class="desk__columns"
-           v-if="columns.length"
-      >
-        <div class="column"
-             v-for="column in columns"
-             :key="columns.id"
-        >
-          <h2 class="column__name">{{ column.title }}</h2>
-          <div class="column__target-area">
-            <div class="column__task"
-                 v-for="task in columnTasks[column.id]"
-                 :key="column.id"
-            >
-              <div class="task">
-                <div class="task__user"
-                     v-if="task.user"
-                >
-                  <div class="task__avatar">
-                    <img
-                        :src="getImage(task.user.avatar)"
-                        :alt="task.user.name"
-                        width="20" height="20"/>
-                  </div>
-                  {{ task.user.name }}
-                </div>
-                <div class="task__statuses">
-                  <span class="task__status"
-                        v-if="task.status"
-                        :class="`task__status--${task.status}`"
-                  />
-                  <span class="task__status"
-                        v-if="task.timeStatus"
-                        :class="`task__status--${task.timeStatus}`"
-                  />
-                </div>
-                <h5 class="task__title"
-                    :class="{'task__title--first': !task.user}"
-                >{{ task.title }}</h5>
-                <ul class="task__tags"
-                    v-if="task.tags && task.tags.length"
-                >
-                  <li v-for="(tag, index) in task.tags"
-                      :key="index"
-                  >
-                    <span class="tag tag--blue">{{ tag }}</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!--      Колонки и задачи-->
+      <div v-if="columnsStore.columns.length" class="desk__columns">
+        <!--        Показываем колонки-->
+        <desk-column
+          v-for="column in columnsStore.columns"
+          :key="column.id"
+          :column="column"
+          @update="columnsStore.updateColumn"
+          @delete="columnsStore.deleteColumn"
+        />
       </div>
-      <p class="desk__emptiness"
-         v-else
-      >Пока нет ни одной колонки</p>
+      <!--      Пустая доска-->
+      <p
+        v-else
+        class="desk__emptiness"
+      >
+        Пока нет ни одной колонки
+      </p>
     </section>
   </main>
 </template>
+
 <script setup>
-  // Подключения
-  import columns from '@/mock/columns.json';
-  import users from '@/mock/users.json';
-  import rowTasks from '@/mock/tasks.json';
-  import {normalizeTask, getTagsArrayFromString} from "@/common/helpers";
-  import {STATUSES} from "@/common/constants";
+import { STATUSES } from '@/common/constants'
+import DeskColumn from '@/modules/columns/components/DeskColumn.vue'
+import { getImage } from '@/common/helpers'
+import { useUsersStore, useColumnsStore, useFiltersStore } from '@/stores'
 
-  // Параметры
-  const normalizedTasks = rowTasks.map((task) => normalizeTask(task));
-
-  // Функции
-  const getImage = (image) => new URL(`@/assets/img/${image}`, import.meta.url).href;
-
-  /***
-   * Сортировка колонок
-   * @param normalizedTasks {Object[]}
-   * @returns {Object}
-   */
-  const columnTasks = (normalizedTasks) => {
-    return normalizedTasks
-        .filter(({ columnId }) => columnId)
-        .reduce((accumulator, task) => {
-          task.tags = getTagsArrayFromString(task.tags);
-          accumulator[task.columnId] ?
-              accumulator[task.columnId] = [...accumulator[task.columnId], task] :
-              accumulator[task.columnId] = [task];
-          return accumulator;
-        });
-  }
+// Определяем хранилища
+const usersStore = useUsersStore()
+const columnsStore = useColumnsStore()
+const filtersStore = useFiltersStore()
 </script>
+
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
 
@@ -170,13 +134,10 @@
   }
 
   &__add {
-    @include m-s10-h12;
-
     position: relative;
 
     margin: 0;
-    padding: 0;
-    padding-left: 32px;
+    padding: 0 0 0 35px;
 
     cursor: pointer;
 
@@ -186,14 +147,22 @@
     background-color: transparent;
 
     &::before {
-      @include p_center-v;
-
-      width: 23px;
-      height: 23px;
+      width: 24px;
+      height: 24px;
 
       content: "";
 
-      background-image: url("../img/icon-add.svg");
+      background-image: url("@/assets/img/icon-add.svg");
+
+      @include p_center-v;
+    }
+
+    &:hover {
+      color: $blue-600;
+    }
+
+    &:active {
+      color: $blue-300;
     }
   }
 
@@ -353,236 +322,10 @@
   }
 }
 
-.column {
-  $bl: &;
-
-  display: flex;
-  flex-direction: column;
-
-  padding-top: 15px;
-
-  border-left: 1px solid $blue-gray-200;
-
-  &__name {
-    @include m-s14-h21;
-
-    display: flex;
-    align-items: center;
-
-    margin: 0 8px;
-
-    color: $blue-gray-600;
-
-    &:hover {
-      #{$bl}__button {
-        opacity: 1;
-      }
-    }
-  }
-
-  &__target-area {
-    overflow-y: auto;
-    flex-grow: 1;
-
-    min-width: 224px;
-    max-width: 380px;
-    height: 1px;
-    padding-right: 8px;
-    padding-bottom: 30px;
-    padding-left: 8px;
-
-    @media (min-width: 1500px) {
-      min-width: 244px;
-    }
-  }
-
-  &__task {
-    display: block;
-
-    width: 100%;
-    margin-top: 16px;
-  }
-
-  &__button {
-    margin: 0;
-    padding: 0;
-
-    transition: opacity 0.3s;
-    transform: scale(0.8);
-
-    opacity: 0;
-    border: none;
-    outline: none;
-    background-color: transparent;
-  }
-
-  &__update {
-    margin-right: 5px;
-    margin-left: 5px;
-  }
+.active {
+  border: 1px solid $blue-600;
+  border-radius: 50%;
+  outline: none;
+  background-color: transparent;
 }
-
-.task {
-  $bl: ".task";
-
-  display: flex;
-  flex-wrap: wrap;
-
-  padding: 8px;
-
-  cursor: pointer;
-
-  border-radius: 6px;
-  background-color: $white-900;
-  box-shadow: 0 4px 8px $shadow-500;
-
-  &--backlog {
-    box-shadow: none;
-
-    #{$bl}__title {
-      order: -2;
-
-      max-width: 290px;
-      margin-top: 0;
-      margin-right: auto;
-    }
-
-    #{$bl}__statuses {
-      order: -1;
-
-      margin-left: 20px;
-    }
-  }
-
-  &__user {
-    @include m-s10-h21;
-
-    display: flex;
-    align-items: center;
-
-    max-width: 80%;
-    margin-right: auto;
-  }
-
-  &__avatar {
-    margin-right: 4px;
-
-    img {
-      display: block;
-
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  &__statuses {
-    display: flex;
-    align-items: center;
-    align-self: flex-start;
-
-    height: 16px;
-    margin-top: 3px;
-  }
-
-  &__status {
-    margin-left: 8px;
-
-    border-radius: 50%;
-
-    &:first-child {
-      margin-left: 0;
-    }
-
-    &--color {
-      width: 8px;
-      height: 8px;
-    }
-
-    &--green {
-      background-color: $green-600;
-    }
-
-    &--orange {
-      background-color: $orange-600;
-    }
-
-    &--red {
-      background-color: $red-600;
-    }
-
-    &--time {
-      width: 16px;
-      height: 16px;
-
-      background-image: url("@/assets/img/status-time.svg");
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-
-    &--alert {
-      width: 16px;
-      height: 16px;
-
-      background-image: url("@/assets/img/status-alert.svg");
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-  }
-
-  &__title {
-    @include r-s14-h21;
-
-    width: 100%;
-    margin-top: 9px;
-    margin-bottom: 0;
-  }
-
-  &__tags {
-    @include clear-list;
-
-    display: flex;
-    flex-wrap: wrap;
-
-    width: 100%;
-    margin-top: 5px;
-
-    li {
-      margin-top: 4px;
-      margin-right: 4px;
-    }
-  }
-}
-
-.tag {
-  @include r-s10-h12;
-
-  padding: 4px 8px;
-
-  border-radius: 100px;
-
-  &--pink {
-    background-color: $pink-300;
-  }
-
-  &--orange {
-    background-color: $yellow-300;
-  }
-
-  &--green {
-    background-color: $green-100;
-  }
-
-  &--yellow {
-    background-color: $yellow-100;
-  }
-
-  &--blue {
-    background-color: $blue-300;
-  }
-
-  &--violet {
-    background-color: $pink-200;
-  }
-}
-
 </style>
