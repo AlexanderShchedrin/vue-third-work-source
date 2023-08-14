@@ -1,24 +1,28 @@
 <template>
+  <!--  Блокируем перенос блоков если пользователь не вошел в систему-->
   <div
-    :draggable="true"
+    :draggable="authStore.isAuthenticated"
     @dragstart.self="onDrag"
     @dragover.prevent
-    @dragend.prevent
+    @dragenter.prevent
   >
-    <slot/>
+    <slot />
   </div>
 </template>
 <script setup>
-import { DATA_TRANSFER_PAYLOAD, MOVE } from '@/common/constants';
+import { DATA_TRANSFER_PAYLOAD, MOVE } from '../constants'
+import { useAuthStore } from '@/stores'
+
+const authStore = useAuthStore()
 
 const props = defineProps({
   transferData: {
     type: Object,
-    required: true,
+    required: true
   }
-});
+})
 
-const onDrag = ({ dataTransfer }) => {
+function onDrag({ dataTransfer }) {
   dataTransfer.effectAllowed = MOVE;
   dataTransfer.dropEffect = MOVE;
   dataTransfer.setData(
@@ -26,5 +30,4 @@ const onDrag = ({ dataTransfer }) => {
     JSON.stringify(props.transferData)
   );
 }
-
 </script>
