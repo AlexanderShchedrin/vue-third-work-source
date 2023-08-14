@@ -16,9 +16,8 @@ const router = useRouter()
 
 const tasksStore = useTasksStore()
 
-// Находим задачу из массива задач по id из строки URL
-const task = tasksStore.tasks.find(task => +task.id === +route.params.id)
-console.log(task)
+// Находим задачу в массиве задач по id из строки URL
+const task = tasksStore.getTaskById(route.params.id)
 if (task) {
   const taskDate = task.dueDate
   task.dueDate = taskDate ? new Date(taskDate) : createNewDate()

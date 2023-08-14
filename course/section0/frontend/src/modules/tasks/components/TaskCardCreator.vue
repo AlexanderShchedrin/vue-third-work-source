@@ -191,7 +191,7 @@ import taskStatuses from '@/common/enums/taskStatuses'
 import { validateFields } from '@/common/validator'
 import { useTaskCardDate } from '@/common/composables'
 import { cloneDeep } from 'lodash'
-import { useTasksStore } from '@/stores';
+import { useTasksStore, useTicksStore } from '@/stores';
 
 // Функция для создания новых задач
 const createNewTask = () => ({
@@ -229,6 +229,7 @@ const setEmptyValidations = () => ({
 
 const router = useRouter()
 const tasksStore = useTasksStore();
+const ticksStore = useTicksStore()
 
 const props = defineProps({
   taskToEdit: {
@@ -301,12 +302,28 @@ function updateTick (tick) {
   }
 }
 
+async function submitTicks (taskId, ticks) {
+  const promises = ticks
+    .map(tick => {
+      if (!tick.text) {
+        return
+      }
+      delete tick.uuid
+      tick.taskId = taskId
+      return tick.id
+        ? ticksStore.updateTick(tick)
+        : ticksStore.addTick(tick)
+    })
+  await Promise.all(promises)
+}
+
 function removeTick ({ uuid, id }) {
   if (uuid) {
     task.value.ticks = task.value.ticks.filter(tick => tick.uuid !== uuid)
   }
   if (id) {
     task.value.ticks = task.value.ticks.filter(tick => tick.id !== id)
+    ticksStore.deleteTick(id)
   }
 }
 
@@ -314,21 +331,25 @@ function setTags (tags) {
   task.value.tags = tags
 }
 
-function submit () {
+async function submit () {
   // Валидируем задачу
   if (!validateFields(task.value, validations.value)) {
     isFormValid.value = false
     return
   }
+  let taskId = task.value.id
   if (props.taskToEdit) {
     // Редактируемая задача
-    tasksStore.editTask(task.value)
+    await tasksStore.editTask(task.value)
   } else {
     // Новая задача
-    tasksStore.addTask(task.value)
+    const newTask = await tasksStore.addTask(task.value)
+    taskId = newTask.id
   }
+  // Создать или обновить подзадачи
+  await submitTicks(taskId, task.value.ticks)
   // Переход на главную страницу
-  router.push('/')
+  await router.push('/')
 }
 
 </script>

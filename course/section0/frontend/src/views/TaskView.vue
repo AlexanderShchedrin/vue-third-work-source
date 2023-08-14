@@ -48,7 +48,7 @@
                 class="task-card__user"
               >
                 <img
-                  :src="getImage(task.user.avatar)"
+                  :src="getPublicImage(task.user.avatar)"
                   :alt="task.user.name"
                 />
                 {{ task.user.name }}
@@ -90,8 +90,9 @@
 
         <div class="task-card__links-item">
           <a
-            :href="task.url"
-            target="_blank"
+            v-if="authStore.getUserAttribute('isAdmin')"
+            class="task-card__edit"
+            @click="router.push({ name: 'TaskEdit', params: { id: $route.params.id }})"
           >
             {{ task.urlDescription || 'ссылка' }}
           </a>
@@ -134,18 +135,19 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getReadableDate, getImage } from '@/common/helpers'
+import { getReadableDate, getPublicImage } from '@/common/helpers'
 import { useTaskCardDate } from '@/common/composables'
 import TaskCardViewTicksList from '../modules/tasks/components/TaskCardViewTicksList.vue'
 import TaskCardTags from '../modules/tasks/components/TaskCardTags.vue'
 import TaskCardViewComments from '../modules/tasks/components/TaskCardViewComments.vue'
-import { useTasksStore } from '@/stores';
+import { useAuthStore, useTasksStore } from '@/stores';
 
 const router = useRouter()
 const route = useRoute()
 
 const dialog = ref(null)
 const tasksStore = useTasksStore()
+const authStore = useAuthStore()
 
 onMounted(() => {
   // Фокусируем на диалоговом окне чтобы сработала клавиша esc без дополнительного клика на окне
@@ -154,7 +156,7 @@ onMounted(() => {
 
 // Найдем задачу по id из массива задач
 const task = computed(() => {
-  return tasksStore.tasks.find(task => Number(task.id) === Number(route.params.id));
+  return tasksStore.getTaskById(route.params.id)
 })
 
 const dueDate = computed(() => {
