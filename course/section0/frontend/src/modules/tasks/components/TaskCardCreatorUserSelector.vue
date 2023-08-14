@@ -15,7 +15,7 @@
         class="users-list__user"
       >
         <img
-          :src="getImage(currentWorker.avatar)"
+          :src="getPublicImage(currentWorker.avatar)"
           @click.stop="isMenuOpened = !isMenuOpened"
         />
         <span @click.stop="isMenuOpened = !isMenuOpened">
@@ -33,14 +33,14 @@
           class="users-list"
         >
           <li
-            v-for="user in users"
+            v-for="user in usersStore.users"
             :key="user.id"
           >
             <button
               class="users-list__user"
               @click="setUser(user.id)"
             >
-              <img :src="getImage(user.avatar)" />
+              <img :src="getPublicImage(user.avatar)" />
               <span>{{ user.name }}</span>
             </button>
           </li>
@@ -49,11 +49,14 @@
     </div>
   </li>
 </template>
+
 <script setup>
-import users from '@/mocks/users.json'
 import { ref, computed } from 'vue'
-import { getImage } from '@/common/helpers'
+import { getPublicImage } from '@/common/helpers'
 import AppIcon from '@/common/components/AppIcon.vue'
+import { useUsersStore } from '@/stores'
+
+const usersStore = useUsersStore()
 
 const props = defineProps({
   modelValue: {
@@ -65,7 +68,7 @@ const emits = defineEmits(['update:modelValue'])
 
 const isMenuOpened = ref(false)
 
-const currentWorker = computed(() => users.find(({ id }) => id === props.modelValue))
+const currentWorker = computed(() => usersStore.users.find(({ id }) => id === props.modelValue))
 
 function setUser(id) {
   emits('update:modelValue', id)
@@ -76,6 +79,7 @@ function hideUserMenu() {
   isMenuOpened.value = false
 }
 </script>
+
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
 
@@ -167,4 +171,3 @@ function hideUserMenu() {
   }
 }
 </style>
-

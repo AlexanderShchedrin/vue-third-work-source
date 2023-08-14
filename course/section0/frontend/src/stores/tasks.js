@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import { useFiltersStore } from '@/stores/filters';
-import { useUsersStore } from '@/stores/users';
-import { normalizeTask } from '@/common/helpers';
-import tasks from '@/mocks/tasks.json';
+import { useUsersStore, useFiltersStore } from '@/stores'
+import { tasksService } from '@/services'
 
 export const useTasksStore = defineStore('tasks', {
   state: () => ({
@@ -58,44 +56,42 @@ export const useTasksStore = defineStore('tasks', {
   },
   actions: {
     async fetchTasks () {
-      // Получение данных из JSON-файла будет заменено в последующих разделах
-      this.tasks = tasks.map(task => normalizeTask(task))
+      this.tasks = await tasksService.fetchTasks()
     },
     updateTasks (tasksToUpdate) {
-      tasksToUpdate.forEach(task => {
+      tasksToUpdate.forEach(async task => {
         const index = this.tasks.findIndex(({ id }) => id === task.id)
+        // findIndex вернёт элемент массива или -1
+        // Используем bitwise not для определения, если index === -1
+        // ~-1 вернёт 0, а значит false
         if (~index) {
+          // Обновить порядок сортировки на сервере
+          await tasksService.updateTask(task)
           this.tasks.splice(index, 1, task)
         }
       })
     },
-    addTask (task) {
-      // Нормализуем задачу
-      const newTask = normalizeTask(task)
-      // Добавляем идентификатор, последний элемент в списке задач
-      // После подключения сервера идентификатор будет присваиваться сервером
-      newTask.id = this.tasks.length + 1
+    async addTask (task) {
       // Добавляем задачу в конец списка задач в бэклоге
-      newTask.sortOrder = this.tasks.filter(task => !task.columnId).length
-      // Если задаче присвоен исполнитель, то добавляем объект пользователя в задачу
-      // Это будет добавлено сервером позже
-      if (newTask.userId) {
-        newTask.user = { ...this.getTaskUserById(newTask.userId) }
-      }
+      task.sortOrder = this.tasks.filter(task => !task.columnId).length
+      const newTask = await tasksService.createTask(task)
       // Добавляем задачу в массив
       this.tasks = [...this.tasks, newTask]
+      return newTask
     },
-    editTask (task) {
-      const index = this.tasks.findIndex(({ id }) => task.id === id)
+    async editTask (task) {
+      const newTask = await tasksService.updateTask(task)
+      const index = this.tasks.findIndex(({ id }) => newTask.id === id)
       if (~index) {
-        const newTask = normalizeTask(task)
         if (newTask.userId) {
           newTask.user = { ...this.getTaskUserById(newTask.userId) }
         }
         this.tasks.splice(index, 1, newTask)
       }
+      return newTask
     },
-    deleteTask (id) {
+    async deleteTask (id) {
+      await tasksService.deleteTask(id)
       this.tasks = this.tasks.filter(task => task.id !== id)
     }
   },
