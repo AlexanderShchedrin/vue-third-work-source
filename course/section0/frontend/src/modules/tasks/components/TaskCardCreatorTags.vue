@@ -3,12 +3,14 @@
     <div class="task-card__tags--text">
       Добавьте теги, разделённые символом #
     </div>
-    <task-card-creator-tags-analyzer
-      v-if="showAnalyzer"
-      class="task-card__tags-analyzer"
-      :tags="tags"
-      @setTags="setTags"
-    />
+    <transition name="replace">
+      <task-card-creator-tags-analyzer
+        v-if="showAnalyzer"
+        class="task-card__tags-analyzer"
+        :tags="tags"
+        @setTags="setTags"
+      />
+    </transition>
   </div>
 </template>
 <script setup>
@@ -26,7 +28,7 @@ const emits = defineEmits(['setTags'])
 const showAnalyzer = ref(true)
 const timeout = ref(null)
 
-function setTags(tags, refresh) {
+function setTags (tags, refresh) {
   if (refresh) {
     // При обновлении тегов очищаем текущую строку
     showAnalyzer.value = false
@@ -35,7 +37,7 @@ function setTags(tags, refresh) {
     timeout.value = setTimeout(() => {
       showAnalyzer.value = true
       clearTimeout(timeout.value)
-    })
+    }, 500)
   } else {
     emits('setTags', tags)
   }
