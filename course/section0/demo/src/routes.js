@@ -24,4 +24,19 @@ export default [
     path: '/animation',
     component: () => import("./demo6/MainView.vue"),
   },
+  {
+    path: "/router-view",
+    name: "RouterView",
+    component: () => import("@/demo6/views/RouterView.vue"),
+  },
+  {
+    path: "/component-a",
+    name: "ComponentA",
+    component: () => import("@/demo6/ComponentA.vue"),
+  },
+  {
+    path: "/component-b",
+    name: "ComponentB",
+    component: () => import("@/demo6/ComponentB.vue"),
+  },
 ];
