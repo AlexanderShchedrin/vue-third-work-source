@@ -39,4 +39,9 @@ export default [
     name: "ComponentB",
     component: () => import("@/demo6/ComponentB.vue"),
   },
+  {
+    path: "/test",
+    name: "Test",
+    component: () => import("@/demo7/views/TestView.vue"),
+  },
 ];
